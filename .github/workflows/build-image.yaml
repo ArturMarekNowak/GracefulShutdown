@@ -1,4 +1,4 @@
-name: Build image
+name: Build and push image
 
 on:
   push:
@@ -15,9 +15,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Build the Docker image for ${{ matrix.arch }}
-        run: |
-          docker build . \
-          --file Dockerfile \
-          --tag gracefulshutdown-${{ matrix.arch }} \
-          --build-arg GO_ARCH=${{ matrix.arch }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push the Docker image for ${{ matrix.arch }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: GO_ARCH=${{ matrix.arch }}
+          tags: arturmareknowak/gracefulshutdown-${{ matrix.arch }}
+          push: true
