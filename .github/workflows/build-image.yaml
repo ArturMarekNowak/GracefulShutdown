@@ -1,0 +1,23 @@
+name: Build image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch: [ amd64, arm64 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build the Docker image for ${{ matrix.arch }}
+        run: |
+          docker build . \
+          --file Dockerfile \
+          --tag gracefulshutdown-${{ matrix.arch }} \
+          --build-arg GO_ARCH=${{ matrix.arch }}
